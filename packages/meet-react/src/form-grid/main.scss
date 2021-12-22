@@ -1,0 +1,10 @@
+@import '~@alifd/next/lib/core/index-noreset.scss';
+
+$form-grid-prefix-cls: '#{$css-prefix}formily-grid';
+
+.#{$form-grid-prefix-cls}-layout {
+  // display: grid;
+  // 无线直接是flex单列
+  display: flex;
+  flex-direction: column;
+}

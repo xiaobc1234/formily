@@ -15,6 +15,7 @@ const presets = () => {
     moment: 'moment',
     'react-is': 'ReactIs',
     '@alifd/next': 'Next',
+    '@alifd/meet-react': ['meet-react'],
     'mobx-react-lite': 'mobxReactLite',
     'react-dom': 'ReactDOM',
     'element-ui': 'Element',
@@ -77,6 +78,7 @@ export const removeImportStyleFromInputFilePlugin = () => ({
   transform(code, id) {
     // 样式由 build:style 进行打包，所以要删除入口文件上的 `import './style'`
     if (inputFilePath === id) {
+      console.log('code: ', inputFilePath)
       return code.replace(`import './style';`, '')
     }
 
