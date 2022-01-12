@@ -90,6 +90,8 @@ function useOverflow<
   const [overflow, setOverflow] = useState(false)
   const containerRef = useRef<Container>()
   const contentRef = useRef<Content>()
+  const layout = useFormLayout()
+  const labelCol = JSON.stringify(layout.labelCol)
 
   useEffect(() => {
     if (containerRef.current && contentRef.current) {
@@ -101,7 +103,7 @@ function useOverflow<
         if (overflow) setOverflow(false)
       }
     }
-  }, [])
+  }, [labelCol])
 
   return {
     overflow,
@@ -401,7 +403,7 @@ export const FormItem: ComposeFormItem = connect(
       return false
     }
     return {
-      label: field.title || props.label,
+      label: props.label || field.title,
       feedbackStatus: takeFeedbackStatus(),
       feedbackText: takeMessage(),
       asterisk: takeAsterisk(),
