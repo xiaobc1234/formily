@@ -98,7 +98,7 @@ export function FormDialog(title: any, id: any, renderer?: any): IFormDialog {
   const modal = {
     ...props,
     style: {
-      width: '40%',
+      width: '100%',
       ...props.style,
     },
     afterClose: () => {
