@@ -86,17 +86,27 @@ const useFormItemLayout = (props: IFormItemProps) => {
 
 function useOverflow<
   Container extends HTMLElement,
-  Content extends HTMLElement
+  Content extends HTMLElement,
+  Asterisk extends HTMLSpanElement
 >() {
   const [overflow, setOverflow] = useState(false)
   const containerRef = useRef<Container>()
   const contentRef = useRef<Content>()
+  const asteriskRef = useRef<Asterisk>()
 
   useEffect(() => {
     if (containerRef.current && contentRef.current) {
       const contentWidth = contentRef.current.getBoundingClientRect().width
+      const asteriskWidth =
+        asteriskRef && asteriskRef.current
+          ? asteriskRef.current?.getBoundingClientRect().width
+          : 0
       const containerWidth = containerRef.current.getBoundingClientRect().width
-      if (contentWidth && containerWidth && containerWidth < contentWidth) {
+      if (
+        contentWidth &&
+        containerWidth &&
+        containerWidth < contentWidth + asteriskWidth
+      ) {
         if (!overflow) setOverflow(true)
       } else {
         if (overflow) setOverflow(false)
@@ -108,6 +118,7 @@ function useOverflow<
     overflow,
     containerRef,
     contentRef,
+    asteriskRef,
   }
 }
 
@@ -121,9 +132,10 @@ export const BaseItem: React.FC<IFormItemProps> = (props) => {
   const { children, ...others } = props
   const [active, setActive] = useState(false)
   const formLayout = useFormItemLayout(others)
-  const { containerRef, contentRef, overflow } = useOverflow<
+  const { containerRef, contentRef, asteriskRef, overflow } = useOverflow<
     HTMLDivElement,
-    HTMLLabelElement
+    HTMLLabelElement,
+    HTMLSpanElement
   >()
   const {
     label,
@@ -216,7 +228,9 @@ export const BaseItem: React.FC<IFormItemProps> = (props) => {
     const labelChildren = (
       <div className={cls(`${prefixCls}-label-content`)} ref={containerRef}>
         {asterisk && (
-          <span className={cls(`${prefixCls}-asterisk`)}>{'*'}</span>
+          <span className={cls(`${prefixCls}-asterisk`)} ref={asteriskRef}>
+            {'*'}
+          </span>
         )}
         <label ref={contentRef}>{label}</label>
       </div>
