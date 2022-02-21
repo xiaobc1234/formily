@@ -105,7 +105,7 @@ function useOverflow<
       if (
         contentWidth &&
         containerWidth &&
-        containerWidth < contentWidth + asteriskWidth
+        containerWidth < contentWidth + asteriskWidth + 4
       ) {
         if (!overflow) setOverflow(true)
       } else {
