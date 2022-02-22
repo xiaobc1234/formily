@@ -1,6 +1,6 @@
 {
   "name": "formily-meet-react-oc",
-  "version": "2.0.13",
+  "version": "2.0.14",
   "license": "MIT",
   "main": "lib",
   "umd:main": "dist/formily.meet.umd.production.js",
@@ -49,7 +49,7 @@
     "react-is": ">=16.8.0 || >=17.0.0"
   },
   "devDependencies": {
-    "@alifd/meet-react": "^2.5.8",
+    "@alifd/meet-react": "^2.6.2",
     "@umijs/plugin-sass": "^1.1.1",
     "dumi": "^1.1.0-rc.8",
     "rollup-plugin-css-porter": "^1.0.2"

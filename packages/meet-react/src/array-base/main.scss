@@ -15,6 +15,10 @@ $array-base-prefix-cls: '#{$css-prefix}formily-array-base';
 
 .#{$array-base-prefix-cls}-addition {
   transition: all 0.25s ease-in-out;
+  display: flex;
+  width: 100%;
+  align-items: center;
+  justify-content: center;
 }
 
 .#{$array-base-prefix-cls}-move-down {

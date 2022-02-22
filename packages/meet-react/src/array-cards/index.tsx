@@ -1,5 +1,6 @@
 import React from 'react'
 // import { Card } from '@alifd/next'
+// import Card, { CardProps } from '@alifd/meet-react/es/card'// 移动端的卡片不好看，用pc的卡片
 import Card, { CardProps } from '@alifd/next/lib/card'
 import { ArrayField } from '@formily/core'
 import {

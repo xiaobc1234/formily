@@ -148,7 +148,7 @@ ArrayBase.Addition = (props) => {
       {...props}
       disabled={array.field?.disabled}
       className={cls(`${prefixCls}-addition`, props.className)}
-      style={{ display: 'block', width: '100%', ...props.style }}
+      style={{ width: '100%', ...props.style }}
       onClick={(e) => {
         if (array.props?.disabled) return
         e.stopPropagation()

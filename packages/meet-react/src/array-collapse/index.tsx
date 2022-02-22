@@ -1,6 +1,7 @@
 import React, { Fragment, useState, useEffect } from 'react'
 // import { Badge, Card, Collapse } from '@alifd/next'
 import Badge from '@alifd/meet-react/es/badge'
+// import Card from '@alifd/meet-react/es/card'
 import Card from '@alifd/next/lib/card'
 import Collapse from '@alifd/next/lib/collapse'
 import { ArrayField } from '@formily/core'
