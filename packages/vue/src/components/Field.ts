@@ -15,11 +15,13 @@ if (isVue2) {
     props: getFieldProps(),
     render(h, context) {
       const props = context.props as IFieldProps
+      const attrs = context.data.attrs
       const componentData = {
         ...context.data,
         props: {
           fieldType: 'Field',
           fieldProps: {
+            ...attrs,
             ...props,
             ...getRawComponent(props),
           },
@@ -40,9 +42,8 @@ if (isVue2) {
             ...props,
             ...getRawComponent(props),
           },
-        } as any
-        const slots = context.slots as any
-        return _h(ReactiveField, componentData, slots)
+        } as Record<string, unknown>
+        return _h(ReactiveField, componentData, context.slots)
       }
     },
   } as unknown as DefineComponent<IFieldProps>

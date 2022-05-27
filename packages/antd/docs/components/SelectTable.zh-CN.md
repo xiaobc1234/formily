@@ -281,9 +281,6 @@ export default () => {
           name="selectTable3"
           x-decorator="FormItem"
           x-component="SelectTable"
-          x-component-props={{
-            hasBorder: false,
-          }}
           default={['1', '3']}
           enum={[
             { key: '1', name: '标题1', description: '描述1' },
@@ -593,6 +590,42 @@ export default () => (
 )
 ```
 
+## 纯 JSX 案例
+
+```tsx
+import React from 'react'
+import { FormItem, FormButtonGroup, Submit, SelectTable } from '@formily/antd'
+import { createForm } from '@formily/core'
+import { FormProvider, Field } from '@formily/react'
+
+const form = createForm()
+
+export default () => (
+  <FormProvider form={form}>
+    <Field
+      name="SelectTable"
+      dataSource={[
+        { key: '1', name: '标题1', description: '描述1' },
+        { key: '2', name: '标题2', description: '描述2' },
+      ]}
+      decorator={[FormItem]}
+      component={[
+        SelectTable,
+        {
+          columns: [
+            { dataIndex: 'name', title: '标题' },
+            { dataIndex: 'description', title: '描述' },
+          ],
+        },
+      ]}
+    />
+    <FormButtonGroup>
+      <Submit onSubmit={console.log}>提交</Submit>
+    </FormButtonGroup>
+  </FormProvider>
+)
+```
+
 ## API
 
 ### SelectTable
@@ -600,7 +633,8 @@ export default () => (
 | 属性名        | 类型                                         | 描述                                                                                                                                 | 默认值       |
 | ------------- | -------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------ | ------------ |
 | mode          | `'multiple' \| 'single'`                     | 设置 SelectTable 模式为单选或多选                                                                                                    | `'multiple'` |
-| optionAsValue | boolean                                      | 使用表格行数据作为值                                                                                                                 | false        |
+| valueType     | `'all' \| 'parent' \| 'child' \| 'path'`     | 返回值类型，checkStrictly 设置为 `false` 时有效                                                                                      | `'all'`      |
+| optionAsValue | boolean                                      | 使用表格行数据作为值，valueType 值为 `'path'` 时无效                                                                                 | false        |
 | showSearch    | boolean                                      | 是否显示搜索组件                                                                                                                     | false        |
 | searchProps   | object                                       | Search 组件属性                                                                                                                      | -            |
 | primaryKey    | `string \| (record) => string`               | 表格行 key 的取值                                                                                                                    | `'key'`      |

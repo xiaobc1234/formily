@@ -1,4 +1,4 @@
-import { autorun, batch } from '@formily/reactive'
+import { autorun, batch, observable } from '@formily/reactive'
 import { createForm, onFieldReact, isField } from '../'
 import { DataField } from '../types'
 import { attach, sleep } from './shared'
@@ -683,6 +683,7 @@ test('reset', async () => {
       },
       initialValues: {
         aa: 123,
+        cc: null,
       },
     })
   )
@@ -698,12 +699,28 @@ test('reset', async () => {
       required: true,
     })
   )
+  const cc = attach(
+    form.createField({
+      name: 'cc',
+      required: true,
+    })
+  )
+  const dd = attach(
+    form.createField({
+      name: 'dd',
+      required: true,
+    })
+  )
   expect(aa.value).toEqual(123)
   expect(bb.value).toEqual(123)
+  expect(cc.value).toEqual(null)
   expect(form.values.aa).toEqual(123)
   expect(form.values.bb).toEqual(123)
+  expect(form.values.cc).toEqual(null)
   aa.onInput('xxxxx')
   expect(form.values.aa).toEqual('xxxxx')
+  dd.onInput(null)
+  expect(form.values.dd).toEqual(null)
   aa.reset()
   expect(aa.value).toEqual(123)
   expect(form.values.aa).toEqual(123)
@@ -712,17 +729,40 @@ test('reset', async () => {
   bb.reset()
   expect(bb.value).toBeUndefined()
   expect(form.values.bb).toBeUndefined()
+
+  cc.onInput('xxxxx')
+  expect(form.values.cc).toEqual('xxxxx')
+  cc.reset()
+  expect(cc.value).toBeNull()
+  expect(form.values.cc).toBeNull()
+  dd.reset()
+  expect(dd.value).toBeUndefined()
+  expect(form.values.dd).toBeUndefined()
+
   aa.reset({
     forceClear: true,
   })
   expect(aa.value).toBeUndefined()
   expect(form.values.aa).toBeUndefined()
+  cc.reset({
+    forceClear: true,
+  })
+  expect(cc.value).toBeUndefined()
+  expect(form.values.cc).toBeUndefined()
+
   expect(aa.valid).toBeTruthy()
   await aa.reset({
     forceClear: true,
     validate: true,
   })
   expect(aa.valid).toBeFalsy()
+
+  expect(cc.valid).toBeTruthy()
+  await cc.reset({
+    forceClear: true,
+    validate: true,
+  })
+  expect(cc.valid).toBeFalsy()
 })
 
 test('match', () => {
@@ -1550,6 +1590,9 @@ test('initial value with empty', () => {
   const form = attach(createForm())
   const array = attach(form.createField({ name: 'array', initialValue: '' }))
   expect(array.value).toEqual('')
+
+  const beNull = attach(form.createField({ name: 'null', initialValue: null }))
+  expect(beNull.value).toEqual(null)
 })
 
 test('field submit', async () => {
@@ -1973,4 +2016,221 @@ test('query value with sibling path syntax', () => {
   )
   textarea.value = '123'
   expect(fn).toBeCalledWith('123', 'aaa')
+})
+
+test('relative query with void field', () => {
+  const form = attach(createForm())
+  attach(
+    form.createVoidField({
+      name: 'void',
+    })
+  )
+  const aa = attach(
+    form.createField({
+      name: 'aa',
+      basePath: 'void',
+    })
+  )
+  attach(
+    form.createVoidField({
+      name: 'mm',
+    })
+  )
+  const bb = attach(
+    form.createField({
+      name: 'bb',
+      basePath: 'mm',
+    })
+  )
+
+  expect(bb.query('.aa').take()).toBe(aa)
+})
+
+test('empty string or number or null value need rewrite default value', () => {
+  const form = attach(
+    createForm<any>({
+      values: {
+        aa: '',
+        bb: 0,
+        ee: null,
+      },
+    })
+  )
+  attach(
+    form.createField({
+      name: 'aa',
+      initialValue: 'test',
+    })
+  )
+  attach(
+    form.createField({
+      name: 'bb',
+      initialValue: 123,
+    })
+  )
+  attach(
+    form.createField({
+      name: 'cc',
+      initialValue: 'test',
+    })
+  )
+  attach(
+    form.createField({
+      name: 'dd',
+      initialValue: 123,
+    })
+  )
+  attach(
+    form.createField({
+      name: 'ee',
+      initialValue: 'test',
+    })
+  )
+  expect(form.values.aa).toEqual('')
+  expect(form.values.bb).toEqual(0)
+  expect(form.values.cc).toEqual('test')
+  expect(form.values.dd).toEqual(123)
+  expect(form.values.ee).toEqual(null)
+})
+
+test('destroy field need auto remove initialValues', () => {
+  const form = attach(createForm<any>())
+  const aa = attach(
+    form.createField({
+      name: 'aa',
+      initialValue: 'test',
+    })
+  )
+  expect(form.initialValues.aa).toEqual('test')
+  expect(form.values.aa).toEqual('test')
+  aa.destroy()
+  expect(form.initialValues.aa).toBeUndefined()
+  expect(form.values.aa).toBeUndefined()
+})
+
+test('validateFirst', async () => {
+  const form = attach(
+    createForm<any>({
+      validateFirst: false,
+    })
+  )
+  const aaValidate = jest.fn(() => 'aaError')
+  const aa = attach(
+    form.createField({
+      name: 'aa',
+      validateFirst: true,
+      validator: [aaValidate, aaValidate],
+    })
+  )
+  await aa.onInput('aa')
+  const bbValidate = jest.fn(() => 'bbError')
+  const bb = attach(
+    form.createField({
+      name: 'bb',
+      validator: [bbValidate, bbValidate],
+      validateFirst: false,
+    })
+  )
+  await bb.onInput('bb')
+  const ccValidate = jest.fn(() => 'ccError')
+  const cc = attach(
+    form.createField({
+      name: 'cc',
+      validator: [ccValidate, ccValidate],
+    })
+  )
+  await cc.onInput('cc')
+
+  expect(aaValidate).toBeCalledTimes(1)
+  expect(bbValidate).toBeCalledTimes(2)
+  expect(ccValidate).toBeCalledTimes(2)
+})
+
+test('reactions should not be triggered when field destroyed', () => {
+  const form = attach(createForm<any>())
+  const handler = jest.fn()
+  const obs = observable({ bb: 123 })
+  const aa = attach(
+    form.createField({
+      name: 'aa',
+      initialValue: 'test',
+      reactions() {
+        handler(obs.bb)
+      },
+    })
+  )
+  obs.bb = 321
+  aa.destroy()
+  obs.bb = 111
+  expect(handler).toBeCalledTimes(2)
+})
+
+test('parent readPretty will overwrite self disabled or readOnly', () => {
+  const form = attach(
+    createForm<any>({
+      readPretty: true,
+    })
+  )
+  const aa = attach(
+    form.createField({
+      name: 'aa',
+      initialValue: 'test',
+      disabled: true,
+    })
+  )
+  const bb = attach(
+    form.createField({
+      name: 'bb',
+      initialValue: 'test',
+      editable: true,
+    })
+  )
+  expect(aa.pattern).toBe('readPretty')
+  expect(bb.pattern).toBe('editable')
+})
+
+test('conflict name for errors filter', async () => {
+  const form = attach(createForm<any>())
+  const aa = attach(
+    form.createField({
+      name: 'aa',
+      required: true,
+    })
+  )
+  const aa1 = attach(
+    form.createField({
+      name: 'aa1',
+      required: true,
+    })
+  )
+
+  await aa1.onInput('')
+  expect(aa.invalid).toBe(false)
+})
+
+test('field destroyed can not be assign value', () => {
+  const form = attach(createForm<any>())
+  const aa = attach(
+    form.createField({
+      name: 'aa',
+    })
+  )
+  aa.destroy()
+  aa.initialValue = 222
+  aa.value = 111
+  expect(form.values).toEqual({})
+  expect(form.initialValues).toEqual({})
+})
+
+test('onInput could pass value with target', async () => {
+  const form = attach(createForm<any>())
+  const aa = attach(
+    form.createField({
+      name: 'aa',
+    })
+  )
+  await aa.onInput({
+    target: '123',
+  })
+  expect(aa.value).toEqual({ target: '123' })
 })

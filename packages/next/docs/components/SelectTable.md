@@ -602,6 +602,43 @@ export default () => (
 )
 ```
 
+## Pure JSX case
+
+```tsx
+import React from 'react'
+import { FormItem, FormButtonGroup, Submit, SelectTable } from '@formily/next'
+import { createForm } from '@formily/core'
+import { FormProvider, Field } from '@formily/react'
+
+const form = createForm()
+
+export default () => (
+  <FormProvider form={form}>
+    <Field
+      name="SelectTable"
+      dataSource={[
+        { key: '1', name: 'title-1', description: 'description-1' },
+        { key: '2', name: 'title-2', description: 'description-2' },
+      ]}
+      decorator={[FormItem]}
+      component={[
+        SelectTable,
+        {
+          hasBorder: false,
+          columns: [
+            { dataIndex: 'name', title: 'Title' },
+            { dataIndex: 'description', title: 'Description' },
+          ],
+        },
+      ]}
+    />
+    <FormButtonGroup>
+      <Submit onSubmit={console.log}>Submit</Submit>
+    </FormButtonGroup>
+  </FormProvider>
+)
+```
+
 ## API
 
 ### SelectTable
@@ -609,7 +646,8 @@ export default () => (
 | Property name | Type                                               | Description                                                                                                                                                                                                                                                 | Default value |
 | ------------- | -------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------- |
 | mode          | `'multiple' \| 'single'`                           | Set mode of SelectTable                                                                                                                                                                                                                                     | `'multiple'`  |
-| optionAsValue | boolean                                            | use `option` as value                                                                                                                                                                                                                                       | false         |
+| valueType     | `'all' \| 'parent' \| 'child' \| 'path'`           | value type, Only applies when checkStrictly is set to `false`                                                                                                                                                                                               | `'all'`       |
+| optionAsValue | boolean                                            | use `option` as value, Only applies when valueType is not set to `'path'`                                                                                                                                                                                   | false         |
 | showSearch    | boolean                                            | show `Search` component                                                                                                                                                                                                                                     | false         |
 | searchProps   | object                                             | `Search` component props                                                                                                                                                                                                                                    | -             |
 | primaryKey    | `string \| (record) => string`                     | Row's unique key                                                                                                                                                                                                                                            | `'key'`       |

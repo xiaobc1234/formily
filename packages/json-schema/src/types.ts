@@ -89,7 +89,7 @@ export type SchemaReaction<Field = any> =
       }
       [key: string]: any
     }
-  | ((field: Field) => void)
+  | ((field: Field, scope: any) => void)
 
 export type SchemaReactions<Field = any> =
   | SchemaReaction<Field>
@@ -289,6 +289,8 @@ export type ISchema<
   ['x-read-only']?: boolean
 
   ['x-read-pretty']?: boolean
+
+  ['x-compile-omitted']?: string[]
 
   [key: `x-${string | number}` | symbol]: any
 }>

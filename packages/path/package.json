@@ -1,6 +1,6 @@
 {
   "name": "@formily/path",
-  "version": "2.0.11",
+  "version": "2.1.3",
   "license": "MIT",
   "main": "lib",
   "module": "esm",

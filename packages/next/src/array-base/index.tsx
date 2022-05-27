@@ -1,6 +1,6 @@
 import React, { createContext, useContext } from 'react'
 import { Button } from '@alifd/next'
-import { isValid, clone, isBool } from '@formily/shared'
+import { isValid, clone } from '@formily/shared'
 import { ButtonProps } from '@alifd/next/lib/button'
 import { ArrayField } from '@formily/core'
 import {
@@ -40,15 +40,15 @@ export interface IArrayBaseItemProps {
 }
 
 export type ArrayBaseMixins = {
-  Addition?: React.FC<IArrayBaseAdditionProps>
-  Remove?: React.FC<IconProps & { index?: number }>
-  MoveUp?: React.FC<IconProps & { index?: number }>
-  MoveDown?: React.FC<IconProps & { index?: number }>
-  SortHandle?: React.FC<IconProps & { index?: number }>
+  Addition?: React.FC<React.PropsWithChildren<IArrayBaseAdditionProps>>
+  Remove?: React.FC<React.PropsWithChildren<IconProps & { index?: number }>>
+  MoveUp?: React.FC<React.PropsWithChildren<IconProps & { index?: number }>>
+  MoveDown?: React.FC<React.PropsWithChildren<IconProps & { index?: number }>>
+  SortHandle?: React.FC<React.PropsWithChildren<IconProps & { index?: number }>>
   Index?: React.FC
   useArray?: () => IArrayBaseContext
-  useIndex?: () => number
-  useRecord?: () => any
+  useIndex?: (index?: number) => number
+  useRecord?: (record?: number) => any
 }
 
 export interface IArrayBaseProps {
@@ -59,9 +59,9 @@ export interface IArrayBaseProps {
   onMoveUp?: (index: number) => void
 }
 
-type ComposedArrayBase = React.FC<IArrayBaseProps> &
+type ComposedArrayBase = React.FC<React.PropsWithChildren<IArrayBaseProps>> &
   ArrayBaseMixins & {
-    Item?: React.FC<IArrayBaseItemProps>
+    Item?: React.FC<React.PropsWithChildren<IArrayBaseItemProps>>
     mixin?: <T extends JSXComponent>(target: T) => T & ArrayBaseMixins
   }
 
@@ -83,18 +83,22 @@ const useRecord = (record?: number) => {
   return ctx ? ctx.record : record
 }
 
+const getSchemaDefaultValue = (schema: Schema) => {
+  if (schema?.type === 'array') return []
+  if (schema?.type === 'object') return {}
+  if (schema?.type === 'void') {
+    for (let key in schema.properties) {
+      const value = getSchemaDefaultValue(schema.properties[key])
+      if (isValid(value)) return value
+    }
+  }
+}
+
 const getDefaultValue = (defaultValue: any, schema: Schema) => {
   if (isValid(defaultValue)) return clone(defaultValue)
   if (Array.isArray(schema?.items))
-    return getDefaultValue(defaultValue, schema.items[0])
-  if (schema?.items?.type === 'array') return []
-  if (schema?.items?.type === 'boolean') return true
-  if (schema?.items?.type === 'date') return ''
-  if (schema?.items?.type === 'datetime') return ''
-  if (schema?.items?.type === 'number') return 0
-  if (schema?.items?.type === 'object') return {}
-  if (schema?.items?.type === 'string') return ''
-  return null
+    return getSchemaDefaultValue(schema.items[0])
+  return getSchemaDefaultValue(schema.items)
 }
 
 export const ArrayBase: ComposedArrayBase = (props) => {
@@ -158,7 +162,7 @@ ArrayBase.Addition = (props) => {
   return (
     <Button
       {...props}
-      disabled={isBool(self?.disabled) ? self?.disabled : array.field?.disabled}
+      disabled={self?.disabled}
       className={cls(`${prefixCls}-addition`, props.className)}
       style={{ display: 'block', width: '100%', ...props.style }}
       onClick={(e) => {
@@ -185,6 +189,7 @@ ArrayBase.Addition = (props) => {
 
 ArrayBase.Remove = React.forwardRef((props, ref) => {
   const index = useIndex(props.index)
+  const self = useField()
   const array = useArray()
   const prefixCls = usePrefixCls('formily-array-base')
   if (!array) return null
@@ -192,10 +197,14 @@ ArrayBase.Remove = React.forwardRef((props, ref) => {
   return (
     <DeleteOutlinedIcon
       {...props}
-      className={cls(`${prefixCls}-remove`, props.className)}
+      className={cls(
+        `${prefixCls}-remove`,
+        self?.disabled ? `${prefixCls}-remove-disabled` : '',
+        props.className
+      )}
       ref={ref}
       onClick={(e) => {
-        if (array.props?.disabled) return
+        if (self?.disabled) return
         e.stopPropagation()
         array.field?.remove?.(index)
         array.props?.onRemove?.(index)
@@ -209,6 +218,7 @@ ArrayBase.Remove = React.forwardRef((props, ref) => {
 
 ArrayBase.MoveDown = React.forwardRef((props, ref) => {
   const index = useIndex(props.index)
+  const self = useField()
   const array = useArray()
   const prefixCls = usePrefixCls('formily-array-base')
   if (!array) return null
@@ -216,10 +226,14 @@ ArrayBase.MoveDown = React.forwardRef((props, ref) => {
   return (
     <DownOutlinedIcon
       {...props}
-      className={cls(`${prefixCls}-move-down`, props.className)}
+      className={cls(
+        `${prefixCls}-move-down`,
+        self?.disabled ? `${prefixCls}-move-down-disabled` : '',
+        props.className
+      )}
       ref={ref}
       onClick={(e) => {
-        if (array.props?.disabled) return
+        if (self?.disabled) return
         e.stopPropagation()
         array.field?.moveDown?.(index)
         array.props?.onMoveDown?.(index)
@@ -233,6 +247,7 @@ ArrayBase.MoveDown = React.forwardRef((props, ref) => {
 
 ArrayBase.MoveUp = React.forwardRef((props, ref) => {
   const index = useIndex(props.index)
+  const self = useField()
   const array = useArray()
   const prefixCls = usePrefixCls('formily-array-base')
   if (!array) return null
@@ -240,10 +255,14 @@ ArrayBase.MoveUp = React.forwardRef((props, ref) => {
   return (
     <UpOutlinedIcon
       {...props}
-      className={cls(`${prefixCls}-move-up`, props.className)}
+      className={cls(
+        `${prefixCls}-move-up`,
+        self?.disabled ? `${prefixCls}-move-up-disabled` : '',
+        props.className
+      )}
       ref={ref}
       onClick={(e) => {
-        if (array.props?.disabled) return
+        if (self?.disabled) return
         e.stopPropagation()
         array?.field?.moveUp(index)
         array?.props?.onMoveUp?.(index)
