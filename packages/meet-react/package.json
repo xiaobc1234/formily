@@ -1,6 +1,6 @@
 {
   "name": "formily-meet-react-oc",
-  "version": "2.0.15",
+  "version": "2.0.16",
   "license": "MIT",
   "main": "lib",
   "umd:main": "dist/formily.meet.umd.production.js",
